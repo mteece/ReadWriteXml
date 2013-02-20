@@ -16,7 +16,7 @@ build/*
 *.xcworkspace
 *.xcuserdata
 !default.xcworkspace
-!virtualmerchant.xcworkspace
+!ReadWriteXml.xcworkspace
 xcuserdata
 profile
 *.moved-aside
