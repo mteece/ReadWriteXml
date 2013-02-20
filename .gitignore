@@ -1,0 +1,27 @@
+*.DS_Store
+*.log
+*.pot
+*.pyc
+local_settings.py
+# Xcode
+build/*
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xcworkspace
+*.xcuserdata
+!default.xcworkspace
+!virtualmerchant.xcworkspace
+xcuserdata
+profile
+*.moved-aside
+#JetBrains
+.idea/
+#SASS
+.sass-cache/
+*.lock
