@@ -9,6 +9,7 @@
 #import "RWXRootViewController.h"
 #import <DDXML.h>
 #import <AFNetworking.h>
+#import <AFKissXMLRequestOperation.h>
 
 @interface RWXRootViewController ()
 
@@ -34,11 +35,11 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
-    NSError *error;
-    NSString *content = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"library" ofType:@"xml"] encoding:NSUTF8StringEncoding error:&error];
-   // [self parseXML:content];
-   // [self createXML];
-    [self postXml];
+    //NSError *error;
+    //NSString *content = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"library" ofType:@"xml"] encoding:NSUTF8StringEncoding error:&error];
+    //[self parseXML:content];
+    //[self createXML];
+    //[self postXml];
     
 }
 
@@ -83,9 +84,8 @@
      NSLog(@"%@", [document description]);
 }
 
--(void)postXml
+-(IBAction)postXml:(id)sender
 {
-    
     DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:@"<addresses/>" options:0 error:nil];
     DDXMLElement *root = [document rootElement];
     [root addChild:[DDXMLNode elementWithName:@"address" stringValue:@"Some Address"]];
@@ -98,53 +98,26 @@
     [request setHTTPBody:[document XMLData]];
     [request addValue:@"text/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
     
-    AFXMLRequestOperation *operation = [AFXMLRequestOperation XMLParserRequestOperationWithRequest:request
-                                                                                           success:^(NSURLRequest *request, NSHTTPURLResponse *response, NSXMLParser *XMLParser) {
-                                                                                               
-                                                                                               // Initialize the XMLParser options.
-                                                                                               [XMLParser setDelegate:self];
-                                                                                               [XMLParser setShouldProcessNamespaces:NO];
-                                                                                               [XMLParser setShouldReportNamespacePrefixes:NO];
-                                                                                               [XMLParser setShouldResolveExternalEntities:NO];
-                                                                                               [XMLParser parse];
-                                                                                               
-                                                                                           } failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, id XML) {
-                                                                                               
-                                                                                               NSString *message = [[NSString alloc] initWithFormat:@"Request failed with error: %@.", error];
-                                                                                               
-                                                                                               UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Request Failed"
-                                                                                                                                               message:message
-                                                                                                                                              delegate:nil
-                                                                                                                                     cancelButtonTitle:@"OK"
-                                                                                                                                     otherButtonTitles:nil];
-                                                                                               [alert show];
-                                                                                               
-                                                                                           }];
-    [operation start];
-}
-
-- (void)parserDidStartDocument:(NSXMLParser *)parser
-{
-    NSLog(@"Parsing started, %@", [parser description]);
-}
-
-- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qualifiedName attributes:(NSDictionary *)attributeDict
-{
+    AFKissXMLRequestOperation *operation = [AFKissXMLRequestOperation XMLDocumentRequestOperationWithRequest:request success:^(NSURLRequest *request, NSHTTPURLResponse *response, DDXMLDocument *XMLDocument) {
+        NSLog(@"XMLDocument: %@", XMLDocument);
+        
+        [_uiResponseOutput setText:[XMLDocument description]];
+        
+        
+    } failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, DDXMLDocument *XMLDocument) {
+        NSLog(@"Failure!");
+        
+        NSString *message = [[NSString alloc] initWithFormat:@"Request failed with error: %@.", error];
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Request Failed"
+                                                        message:message
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    }];
     
-}
-
-- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
-{
-    NSLog(@"Element value: %@", string);
-}
-
-- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
-{
-}
-
-- (void) parserDidEndDocument: (NSXMLParser *)parser
-{
-     NSLog(@"Parsing ended, %@", [parser description]);
+    [operation start];
 }
 
 - (void)didReceiveMemoryWarning
