@@ -7,6 +7,9 @@
 //
 
 #import "RWXRootViewController.h"
+#import "RWXAddressModel.h"
+#import "RWXUserModel.h"
+#import "RWXPersonModel.h"
 #import <DDXML.h>
 #import <AFNetworking.h>
 #import <AFKissXMLRequestOperation.h>
@@ -38,7 +41,7 @@
     //NSError *error;
     //NSString *content = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"library" ofType:@"xml"] encoding:NSUTF8StringEncoding error:&error];
     //[self parseXML:content];
-    //[self createXML];
+    [self createXML];
     //[self postXml];
     
 }
@@ -70,18 +73,40 @@
 
 -(void)createXML
 {
-    DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:@"<addresses/>" options:0 error:nil];
+    // XML to user object.
+    DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:@"<users/>" options:0 error:nil];
     DDXMLElement *root = [document rootElement];
-    [root addChild:[DDXMLNode elementWithName:@"address" stringValue:@"Some Address"]];
+    [root addChild:[DDXMLNode elementWithName:@"firstName" stringValue:@"Matt"]];
+    [root addChild:[DDXMLNode elementWithName:@"lastName" stringValue:@"Teece"]];
     
-    //This will give you:
-    /*
-    <addresses>
-    <address>Some Address</address>
-    </addresses>
-     */
     [document XMLStringWithOptions:DDXMLNodePrettyPrint];
      NSLog(@"%@", [document description]);
+    
+    RWXUserModel *user = [[RWXUserModel alloc] initWithXMLString:[document XMLStringWithOptions:DDXMLNodePrettyPrint]];
+    NSLog(@"%@", user);
+    
+    // Serialize a user object into DDXml
+    RWXUserModel *user2 = [[RWXUserModel alloc] init];
+    [user2 setFirstName:@"Ed"];
+    [user2 setLastName:@"Atwell"];
+    
+    DDXMLDocument *userDoc = [user2 objectAsDDXMLDocument];
+     NSLog(@"%@", [userDoc XMLStringWithOptions:DDXMLNodePrettyPrint]);
+    
+    
+    // Complex objects.
+    RWXAddressModel *address = [[RWXAddressModel alloc] init];
+    [address setStreetName:@"Burlingame"];
+    [address setPostalCode:@"01507"];
+    [address setPostNumber:508];
+    [address setDateCreated:[NSDate date]];
+    
+    RWXPersonModel *person = [[RWXPersonModel alloc] init];
+     [person setAddress:address];
+     [person setUser:user];
+     
+     DDXMLDocument *complexDoc = [person objectAsDDXMLDocument];
+     NSLog(@"%@", [complexDoc XMLStringWithOptions:DDXMLNodePrettyPrint]);
 }
 
 -(IBAction)postXml:(id)sender
@@ -99,10 +124,20 @@
     [request addValue:@"text/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
     
     AFKissXMLRequestOperation *operation = [AFKissXMLRequestOperation XMLDocumentRequestOperationWithRequest:request success:^(NSURLRequest *request, NSHTTPURLResponse *response, DDXMLDocument *XMLDocument) {
-        NSLog(@"XMLDocument: %@", XMLDocument);
+       // NSLog(@"XMLDocument: %@", XMLDocument);
         
         [_uiResponseOutput setText:[XMLDocument description]];
+        NSArray *resultNodes = nil;
+
+        NSError *error;
+        resultNodes = [XMLDocument nodesForXPath:@"//addresses/address" error:&error];
         
+        for(DDXMLElement *resultElement in resultNodes) {
+            NSArray *props = [NSArray arrayWithArray:[RWXAddressModel objectAsArray]];
+            RWXAddressModel *address = [[RWXAddressModel alloc] initWithDDXMLElement:resultElement];
+            
+            
+        }
         
     } failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, DDXMLDocument *XMLDocument) {
         NSLog(@"Failure!");

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		544E42EB16DD3A94006290F9 /* RWXAddressModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 544E42EA16DD3A94006290F9 /* RWXAddressModel.m */; };
+		544E42EE16DD5C4A006290F9 /* RWXModelBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 544E42ED16DD5C4A006290F9 /* RWXModelBase.m */; };
+		544E42F116DD5F1B006290F9 /* RWXUserModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 544E42F016DD5F1B006290F9 /* RWXUserModel.m */; };
+		544E42F416DD656B006290F9 /* RWXPersonModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 544E42F316DD656B006290F9 /* RWXPersonModel.m */; };
 		54E4CC9F16D4109E000167BA /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54E4CC9E16D4109E000167BA /* UIKit.framework */; };
 		54E4CCA116D4109E000167BA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54E4CCA016D4109E000167BA /* Foundation.framework */; };
 		54E4CCA316D4109E000167BA /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54E4CCA216D4109E000167BA /* CoreGraphics.framework */; };
@@ -23,6 +27,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		544E42E916DD3A94006290F9 /* RWXAddressModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWXAddressModel.h; sourceTree = "<group>"; };
+		544E42EA16DD3A94006290F9 /* RWXAddressModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RWXAddressModel.m; sourceTree = "<group>"; };
+		544E42EC16DD5C4A006290F9 /* RWXModelBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWXModelBase.h; sourceTree = "<group>"; };
+		544E42ED16DD5C4A006290F9 /* RWXModelBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RWXModelBase.m; sourceTree = "<group>"; };
+		544E42EF16DD5F1B006290F9 /* RWXUserModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWXUserModel.h; sourceTree = "<group>"; };
+		544E42F016DD5F1B006290F9 /* RWXUserModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RWXUserModel.m; sourceTree = "<group>"; };
+		544E42F216DD656B006290F9 /* RWXPersonModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RWXPersonModel.h; sourceTree = "<group>"; };
+		544E42F316DD656B006290F9 /* RWXPersonModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RWXPersonModel.m; sourceTree = "<group>"; };
 		54E4CC9B16D4109E000167BA /* ReadWriteXml.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadWriteXml.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		54E4CC9E16D4109E000167BA /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		54E4CCA016D4109E000167BA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -97,6 +109,14 @@
 				54E4CCBB16D411C1000167BA /* RWXRootViewController.h */,
 				54E4CCBC16D411C1000167BA /* RWXRootViewController.m */,
 				54E4CCBD16D411C1000167BA /* RWXRootViewController.xib */,
+				544E42E916DD3A94006290F9 /* RWXAddressModel.h */,
+				544E42EA16DD3A94006290F9 /* RWXAddressModel.m */,
+				544E42EF16DD5F1B006290F9 /* RWXUserModel.h */,
+				544E42F016DD5F1B006290F9 /* RWXUserModel.m */,
+				544E42EC16DD5C4A006290F9 /* RWXModelBase.h */,
+				544E42ED16DD5C4A006290F9 /* RWXModelBase.m */,
+				544E42F216DD656B006290F9 /* RWXPersonModel.h */,
+				544E42F316DD656B006290F9 /* RWXPersonModel.m */,
 			);
 			path = ReadWriteXml;
 			sourceTree = "<group>";
@@ -205,6 +225,10 @@
 				54E4CCAB16D4109E000167BA /* main.m in Sources */,
 				54E4CCAF16D4109E000167BA /* RWXAppDelegate.m in Sources */,
 				54E4CCBE16D411C1000167BA /* RWXRootViewController.m in Sources */,
+				544E42EB16DD3A94006290F9 /* RWXAddressModel.m in Sources */,
+				544E42EE16DD5C4A006290F9 /* RWXModelBase.m in Sources */,
+				544E42F116DD5F1B006290F9 /* RWXUserModel.m in Sources */,
+				544E42F416DD656B006290F9 /* RWXPersonModel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,7 +8,7 @@ def api_root():
 
 @app.route('/xml', methods = ['POST'])
 def api_xml():
-    xml = '<users><user>Some Users</user></users>'
+    xml = '<addresses><address><streetName>Happy Street</streetName><postalCode>03801</postalCode><postNumber>123</postNumber><dateCreated>01/01/2013</dateCreated></address></addresses>'
     return Response(xml, mimetype='text/xml')
 
 @app.route('/hello', methods = ['GET'])
