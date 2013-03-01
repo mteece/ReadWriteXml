@@ -107,6 +107,21 @@
      
      DDXMLDocument *complexDoc = [person objectAsDDXMLDocument];
      NSLog(@"%@", [complexDoc XMLStringWithOptions:DDXMLNodePrettyPrint]);
+    
+    [RWXModelBase registerKnownClass:[RWXCompanyModel class]];
+    // Object without serialization
+    RWXPersonModel *otherPerson = [[RWXPersonModel alloc] init];
+    RWXCompanyModel *comp = [[RWXCompanyModel alloc] init];
+    [comp setTitle:@"PixelMEDIA"];
+    
+    [otherPerson setAddress:address];
+    [otherPerson setUser:user];
+    [otherPerson setCompany:comp];
+    
+    
+    DDXMLDocument *pXml = [otherPerson objectAsDDXMLDocument];
+    NSLog(@"%@", [pXml XMLStringWithOptions:DDXMLNodePrettyPrint]);
+    
 }
 
 -(IBAction)postXml:(id)sender

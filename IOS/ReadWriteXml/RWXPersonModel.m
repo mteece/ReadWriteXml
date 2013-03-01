@@ -10,6 +10,6 @@
 
 @implementation RWXPersonModel
 
-@synthesize user, address;
+@synthesize user, address, company;
 
 @end
