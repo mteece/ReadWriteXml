@@ -11,14 +11,18 @@
 
 @interface RWXModelBase : NSObject
 
-+ (NSArray *)objectAsArray;
+@property (strong, nonatomic) NSString* personType;
+@property (strong, nonatomic) NSString* personId;
+
++ (NSArray *) objectAsArray;
 + (void) initialize;
 + (void) registerKnownClass:(Class) class;
 - (id) initWithXMLString:(NSString*) xmlString;
 - (id) initWithDDXMLElement:(DDXMLElement*) element;
-
 - (DDXMLDocument *) objectAsDDXMLDocument;
 - (DDXMLDocument *) objectAsDDXMLDocumentWithName:(NSString* ) name;
 - (NSDictionary *) objectAsDictionary;
-
+- (NSString *) serializeStringToXmlFormatedString:(NSString *) inputString;
+- (NSString *) dserializeStringFromXmlFormatedString:(NSString *) inputString;
+- (NSArray *) describe:(id)instance classType:(Class)classType;
 @end

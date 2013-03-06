@@ -32,14 +32,24 @@ Class property_getClass( objc_property_t property )
 	return ( NSClassFromString(prop) );
 }
 
+static BOOL nestChildObjects;
 static NSMutableArray *knownClasses;
+static NSMutableDictionary *knownProperties;
 
 @implementation RWXModelBase
 
 +(void) initialize
-{    
-    if(!knownClasses)
+{
+    nestChildObjects = NO;
+    
+    if(!knownClasses) {
         knownClasses = [NSMutableArray array];
+    }
+    
+    if(!knownProperties) {
+        knownProperties = [[NSMutableDictionary alloc] init];
+    }
+    
 }
 
 +(void) registerKnownClass:(Class) class
@@ -77,6 +87,23 @@ static NSMutableArray *knownClasses;
 - (id) initWithDDXMLElement:(DDXMLElement *) element
 {
     if(element == nil) return nil;
+    
+    NSArray *children = [element children];
+    BOOL found = NO;
+    for (DDXMLNode *node in children) {
+        NSString *nodeName = [NSString stringWithString:[node name]];
+        if ([nodeName rangeOfString:@"ssl_"].location != NSNotFound) {
+            found = YES;
+        } else {
+            found = NO;
+            break;
+        }
+    }
+    if (!found) {
+        NSLog(@"XML Parsing error: 'ssl_' prefix missing.");
+        return nil;
+    }
+    
     if((self = [self init])) {
         
         u_int outCount, i;
@@ -86,8 +113,9 @@ static NSMutableArray *knownClasses;
             const char *propName = property_getName(property);
             
             if(propName) {
+                NSString *xmlPropertyName = [self serializeStringToXmlFormatedString:[NSString stringWithUTF8String:propName]];
                 NSString *propertyName = [NSString stringWithUTF8String:propName];
-                NSArray *array = [element elementsForName:propertyName];
+                NSArray *array = [element elementsForName:xmlPropertyName];
                 
                 id value = nil;
                 if([array count] > 0)
@@ -120,50 +148,58 @@ static NSMutableArray *knownClasses;
                                                           options:0
                                                             error:nil];
     DDXMLElement *rootElement = [doc rootElement];
-    u_int outCount, i;
+    u_int i;
     
-    objc_property_t *properties = class_copyPropertyList([self class], &outCount);
-    for(i = 0; i < outCount; i++) {
-        objc_property_t property = properties[i];
-        const char *propName = property_getName(property);
+    NSArray *allProperties = [self describe:self classType:[self class]];
+    for(i = 0; i < [allProperties count]; i++) {
+        NSString *propName = [NSString stringWithString:[allProperties objectAtIndex:i]];
         if(propName) {
-            NSString *propertyName = [NSString stringWithUTF8String:propName];
+            NSString *xmlPropertyName = [self serializeStringToXmlFormatedString:propName];
+            NSString *propertyName = [NSString stringWithString:propName];
             NSValue *value = [self valueForKey:propertyName];
             
             if([value isKindOfClass:[RWXModelBase class]]) {
-                
-                DDXMLDocument *childDoc = [((RWXModelBase *)value) objectAsDDXMLDocumentWithName:propertyName];
+                [knownProperties setObject:xmlPropertyName forKey:propertyName];
+                DDXMLDocument *childDoc = [((RWXModelBase *)value) objectAsDDXMLDocumentWithName:xmlPropertyName];
                 DDXMLElement *childElement = [[childDoc rootElement] copy];
-                [rootElement addChild:childElement];
+                
+                if(nestChildObjects) {
+                    [rootElement addChild:childElement];
+                } else {
+                    NSArray *elementChildren = [[childElement children] copy];
+                    for (DDXMLNode *node in elementChildren) {
+                        [node detach];
+                        [rootElement addChild:node];
+                    }
+                }
             }
             else if (value && (id)value != [NSNull null]) {
                 
                 char firstChar = [propertyName characterAtIndex:0];
                 if((firstChar >= 'A' && firstChar <= 'Z') || (firstChar >= 'a' && firstChar <= 'z')) {
+                    [knownProperties setObject:xmlPropertyName forKey:propertyName];
                     //unicode and numbers causes occasional problems with DDXMLNode
-                    DDXMLNode *node = [DDXMLNode elementWithName:propertyName stringValue:[value description]];
+                    DDXMLNode *node = [DDXMLNode elementWithName:xmlPropertyName stringValue:[value description]];
                     [rootElement addChild:node];
                 }
             }
         }
     }
     
-    free(properties);
     return doc;
 }
 
-- (NSDictionary *) objectAsDictionary {
+- (NSDictionary *) objectAsDictionary
+{
     
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
+    u_int i;
     
-    u_int outCount, i;
-    
-    objc_property_t *properties = class_copyPropertyList([self class], &outCount);
-    for(i = 0; i < outCount; i++) {
-        objc_property_t property = properties[i];
-        const char *propName = property_getName(property);
+    NSArray *allProperties = [self describe:self classType:[self class]];
+    for(i = 0; i < [allProperties count]; i++) {
+        NSString *propName = [NSString stringWithString:[allProperties objectAtIndex:i]];
         if(propName) {
-            NSString *propertyName = [NSString stringWithUTF8String:propName];
+            NSString *propertyName = [NSString stringWithString:propName];
             NSValue *value = [self valueForKey:propertyName];
             
             if (value && (id)value != [NSNull null]) {
@@ -171,9 +207,93 @@ static NSMutableArray *knownClasses;
             }
         }
     }
-    free(properties);
-    
     return dict;
 }
+
+- (NSString *) serializeStringToXmlFormatedString:(NSString *)inputString
+{
+    int index = 0;
+    NSMutableString *mutableInputString = [NSMutableString stringWithString:inputString];
+    NSMutableString *appenedString = [[NSMutableString alloc] init];
+    
+    while (index < mutableInputString.length) {
+        
+        unichar uc = [mutableInputString characterAtIndex:index];
+        NSString *currentChar = [NSString stringWithCharacters:&uc length:1];
+        
+        if ([[NSCharacterSet uppercaseLetterCharacterSet] characterIsMember:[mutableInputString characterAtIndex:index]]) {
+            NSString *shift =  [NSString stringWithString:currentChar];
+            [appenedString appendString:@"_"];
+            [appenedString appendString:[shift lowercaseString]];
+            index++;
+        } else {
+            [appenedString appendString:currentChar];
+            index++;
+        }
+    }
+    
+    [appenedString insertString:@"ssl_" atIndex:0];
+    
+    return [NSString stringWithString:appenedString];
+}
+
+- (NSString *) dserializeStringFromXmlFormatedString:(NSString *)inputString
+{
+    int index = 0;
+    NSMutableString *mutableInputString = [NSMutableString stringWithString:[inputString substringFromIndex:3]];
+    NSMutableString *appenedString = [[NSMutableString alloc] init];
+    
+    while (index < mutableInputString.length) {
+        
+        unichar uc = [mutableInputString characterAtIndex:index];
+        NSString *currentChar = [NSString stringWithCharacters:&uc length:1];
+        
+        if ([[NSCharacterSet characterSetWithCharactersInString:@"_"] characterIsMember:[mutableInputString characterAtIndex:index]]) {
+            NSString *shift =  [NSString stringWithString:currentChar];
+            [appenedString appendString:[shift uppercaseString]];
+            index++;
+        } else {
+            [appenedString appendString:currentChar];
+            index++;
+        }
+    }
+    
+    return [NSString stringWithString:appenedString];
+
+}
+
+- (NSArray *) describe:(id)instance classType:(Class)classType
+{
+    NSUInteger count;
+    objc_property_t *propList = class_copyPropertyList(classType, &count);
+    NSMutableArray *propArray = [[NSMutableArray alloc] init];
+    
+    for ( int i = 0; i < count; i++ )
+    {
+        objc_property_t property = propList[i];
+        
+        const char *propName = property_getName(property);
+        NSString *propNameString =[NSString stringWithCString:propName encoding:NSASCIIStringEncoding];
+        
+        if(propName)
+        {
+            //id value = [instance valueForKey:propNameString];
+            //NSLog(@"%@=%@ ; ", propNameString, value);
+            [propArray addObject:propNameString];
+        }
+    }
+    free(propList);
+    
+    Class superClass = class_getSuperclass( classType );
+    if ( superClass != nil && ! [superClass isEqual:[NSObject class]] )
+    {
+        NSArray *superArray = [self describe:instance classType:superClass];
+        for(int i = 0; i < [superArray count]; i++) {
+            [propArray addObject:superArray[i]];
+        }
+    }
+    return propArray;
+}
+
 
 @end

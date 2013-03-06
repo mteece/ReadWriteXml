@@ -11,6 +11,11 @@ def api_xml():
     xml = '<addresses><address><streetName>Happy Street</streetName><postalCode>03801</postalCode><postNumber>123</postNumber><dateCreated>01/01/2013</dateCreated></address></addresses>'
     return Response(xml, mimetype='text/xml')
 
+@app.route('/elaxml', methods = ['POST'])
+def api_elaxml():
+    xml = '<txnrecimport><txn><ssl_transaction_type>ccsale</ssl_transaction_type><ssl_merchant_id>123456789</ssl_merchant_id><ssl_user_id>aabbccdd</ssl_user_id><ssl_pin>1234</ssl_pin><ssl_show_form>FALSE</ssl_show_form></txn><txn><ssl_transaction_type>ccsale</ssl_transaction_type><ssl_merchant_id>123456789</ssl_merchant_id><ssl_user_id>aabbccdd</ssl_user_id><ssl_pin>1234</ssl_pin><ssl_show_form>FALSE</ssl_show_form></txn></txnrecimport>'
+    return Response(xml, mimetype='text/xml')
+
 @app.route('/hello', methods = ['GET'])
 def api_hello():
     data = {

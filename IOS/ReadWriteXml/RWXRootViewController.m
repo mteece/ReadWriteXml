@@ -10,6 +10,7 @@
 #import "RWXAddressModel.h"
 #import "RWXUserModel.h"
 #import "RWXPersonModel.h"
+#import "RWXOtherPerson.h"
 #import <DDXML.h>
 #import <AFNetworking.h>
 #import <AFKissXMLRequestOperation.h>
@@ -43,7 +44,65 @@
     //[self parseXML:content];
     [self createXML];
     //[self postXml];
+    //[self tryParseString];
+    //[self tryNestedXml];
+    //[self tryBaseObject];
+}
+
+- (void) tryParseString
+{
     
+    
+    // Serialize a user object into DDXml
+    RWXUserModel *user2 = [[RWXUserModel alloc] init];
+    [user2 setFirstName:@"Ed"];
+    [user2 setLastName:@"Atwell"];
+    
+   // DDXMLDocument *userDoc = [user2 objectAsDDXMLDocument];
+    NSLog(@"%@", [user2 serializeStringToXmlFormatedString:@"firstName"]);
+    NSLog(@"%@", [user2 serializeStringToXmlFormatedString:@"firstNameOrLastname"]);
+}
+
+- (void) tryBaseObject
+{
+    RWXOtherPerson *oPerson = [[RWXOtherPerson alloc] init];
+    [oPerson setPersonId:@"123"];
+    [oPerson setPersonType:@"HUMAN"];
+    
+    DDXMLDocument *complexDoc = [oPerson objectAsDDXMLDocumentWithName:@"txn"];
+    NSLog(@"%@", [complexDoc XMLStringWithOptions:DDXMLNodePrettyPrint]);
+    
+    NSDictionary *dict = [[NSDictionary alloc] initWithDictionary:[oPerson objectAsDictionary]];
+    NSLog(@"%@", [dict description]);
+    
+    NSArray *props = [RWXModelBase objectAsArray];
+    NSLog(@"%@", [props description]);
+}
+
+- (void) tryNestedXml
+{
+    // Serialize a user object into DDXml
+    RWXUserModel *user = [[RWXUserModel alloc] init];
+    [user setFirstName:@"Ed"];
+    [user setLastName:@"Atwell"];
+    
+    // Complex objects.
+    RWXAddressModel *address = [[RWXAddressModel alloc] init];
+    [address setStreetName:@"Burlingame"];
+    [address setPostalCode:@"01507"];
+    [address setPostNumber:508];
+    [address setDateCreated:[NSDate date]];
+    
+    RWXPersonModel *person = [[RWXPersonModel alloc] init];
+    [person setAddress:address];
+    [person setUser:user];
+    
+    // Apply base object stuff
+    [person setPersonId:@"123"];
+    [person setPersonType:@"Human"];
+    
+    DDXMLDocument *complexDoc = [person objectAsDDXMLDocumentWithName:@"txn"];
+    NSLog(@"%@", [complexDoc XMLStringWithOptions:DDXMLNodePrettyPrint]);
 }
 
 -(void)parseXML:(NSString*)source {
@@ -73,11 +132,12 @@
 
 -(void)createXML
 {
+    
     // XML to user object.
-    DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:@"<users/>" options:0 error:nil];
+    DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:@"<txn/>" options:0 error:nil];
     DDXMLElement *root = [document rootElement];
-    [root addChild:[DDXMLNode elementWithName:@"firstName" stringValue:@"Matt"]];
-    [root addChild:[DDXMLNode elementWithName:@"lastName" stringValue:@"Teece"]];
+    [root addChild:[DDXMLNode elementWithName:@"ssl_first_name" stringValue:@"Matt"]];
+    [root addChild:[DDXMLNode elementWithName:@"ssl_last_name" stringValue:@"Teece"]];
     
     [document XMLStringWithOptions:DDXMLNodePrettyPrint];
      NSLog(@"%@", [document description]);
@@ -102,8 +162,8 @@
     [address setDateCreated:[NSDate date]];
     
     RWXPersonModel *person = [[RWXPersonModel alloc] init];
-     [person setAddress:address];
-     [person setUser:user];
+    [person setAddress:address];
+    [person setUser:user];
      
      DDXMLDocument *complexDoc = [person objectAsDDXMLDocument];
      NSLog(@"%@", [complexDoc XMLStringWithOptions:DDXMLNodePrettyPrint]);
@@ -139,7 +199,7 @@
     [request addValue:@"text/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
     
     AFKissXMLRequestOperation *operation = [AFKissXMLRequestOperation XMLDocumentRequestOperationWithRequest:request success:^(NSURLRequest *request, NSHTTPURLResponse *response, DDXMLDocument *XMLDocument) {
-       // NSLog(@"XMLDocument: %@", XMLDocument);
+       NSLog(@"XMLDocument: %@", XMLDocument);
         
         [_uiResponseOutput setText:[XMLDocument description]];
         NSArray *resultNodes = nil;
@@ -150,8 +210,8 @@
         for(DDXMLElement *resultElement in resultNodes) {
             NSArray *props = [NSArray arrayWithArray:[RWXAddressModel objectAsArray]];
             RWXAddressModel *address = [[RWXAddressModel alloc] initWithDDXMLElement:resultElement];
-            
-            
+            NSLog(@"%@", [props description]);
+            NSLog(@"%@", [address description]);
         }
         
     } failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, DDXMLDocument *XMLDocument) {
